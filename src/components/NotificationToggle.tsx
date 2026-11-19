@@ -16,7 +16,10 @@ export function NotificationToggle({
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
+  const [ios, setIos] = useState(false);
+
   useEffect(() => {
+    setIos(/iphone|ipad|ipod/i.test(navigator.userAgent));
     setSupported(
       typeof window !== "undefined" &&
         "serviceWorker" in navigator &&
@@ -107,7 +110,9 @@ export function NotificationToggle({
   if (!supported) {
     return (
       <p className="text-sm text-muted">
-        Les notifications push ne sont pas supportées sur cet appareil / navigateur.
+        {ios
+          ? "Sur iPhone, installe d'abord Airoma : touche Partager dans Safari, puis « Sur l'écran d'accueil ». Ouvre ensuite l'app depuis l'icône et reviens ici pour activer les rappels."
+          : "Les notifications push ne sont pas supportées sur cet appareil / navigateur."}
       </p>
     );
   }

@@ -71,7 +71,11 @@ export function CheckinForm({
         if (achievementError) throw achievementError;
       }
 
-      setMessage("Progression enregistrée.");
+      setMessage(
+        progress >= 100
+          ? "🎉 Objectif atteint, bravo ! Tu peux être fier·e de toi."
+          : "Progression enregistrée.",
+      );
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur de check-in");

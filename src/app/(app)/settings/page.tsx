@@ -1,4 +1,5 @@
 import { NotificationToggle } from "@/components/NotificationToggle";
+import { InstallPrompt } from "@/components/InstallPrompt";
 import { ProfileForm } from "@/components/ProfileForm";
 import { SignOutButton } from "@/components/SignOutButton";
 import { createClient } from "@/lib/supabase/server";
@@ -28,6 +29,8 @@ export default async function SettingsPage() {
           Profil, fuseau horaire et notifications push.
         </p>
       </div>
+
+      <InstallPrompt />
 
       {profile ? <ProfileForm profile={profile as Profile} /> : null}
 
