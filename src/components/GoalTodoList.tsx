@@ -3,6 +3,7 @@
 import { useMemo, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { todayIn } from "@/lib/periods";
 import { daysUntil } from "@/lib/streak";
 import {
   addDays,
@@ -63,6 +64,7 @@ export function GoalTodoList({
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [publishOnComplete, setPublishOnComplete] = useState(false);
+  const [postponeId, setPostponeId] = useState<string | null>(null);
 
   const sorted = useMemo(() => [...todos].sort(compareTodos), [todos]);
   const nextId = sorted.find((t) => !t.is_done && !t.is_skipped)?.id;
@@ -225,6 +227,23 @@ export function GoalTodoList({
     router.refresh();
   }
 
+  // Reporter : décale l'échéance. Le décalage part de l'échéance actuelle, ou
+  // d'aujourd'hui si l'étape est déjà en retard / sans date.
+  function postponeOptions(todo: GoalTodo) {
+    const today = todayIn(timeZone);
+    const base = todo.due_date && todo.due_date >= today ? todo.due_date : today;
+    return [
+      { label: "Demain", date: addDays(today, 1) },
+      { label: "+ 1 semaine", date: addDays(base, 7) },
+      { label: "+ 1 mois", date: addMonths(base, 1) },
+    ].filter((o) => !todo.due_date || o.date > todo.due_date);
+  }
+
+  async function postponeTodo(todo: GoalTodo, date: string) {
+    await changeDueDate(todo, date);
+    setPostponeId(null);
+  }
+
   async function deleteTodo(todoId: string) {
     setLoadingId(todoId);
     setError(null);
@@ -341,6 +360,20 @@ export function GoalTodoList({
                     >
                       {skipped ? "Rétablir" : "Passer"}
                     </button>
+                    {!todo.is_done && !skipped ? (
+                      <button
+                        type="button"
+                        className="min-h-11 px-2 text-sm font-medium text-brand-navy underline-offset-2 hover:underline"
+                        disabled={loadingId === todo.id}
+                        aria-expanded={postponeId === todo.id}
+                        onClick={() =>
+                          setPostponeId(postponeId === todo.id ? null : todo.id)
+                        }
+                        aria-label={`Reporter l'étape « ${todo.title} »`}
+                      >
+                        Reporter
+                      </button>
+                    ) : null}
                     <input
                       type="date"
                       value={todo.due_date ?? ""}
@@ -362,6 +395,28 @@ export function GoalTodoList({
                       Supprimer
                     </button>
                   </>
+                ) : null}
+                {isOwner && postponeId === todo.id ? (
+                  <div className="flex basis-full flex-wrap items-center gap-2 border-t border-border/60 px-2 py-2">
+                    <span className="text-xs text-muted">Reporter à :</span>
+                    {postponeOptions(todo).map((o) => (
+                      <button
+                        key={o.label}
+                        type="button"
+                        disabled={loadingId === todo.id}
+                        onClick={() => postponeTodo(todo, o.date)}
+                        className="btn-secondary !min-h-11 !px-3 !py-1.5 !text-sm"
+                      >
+                        {o.label}
+                        <span className="ml-1.5 text-xs font-normal text-muted">
+                          {formatShortDate(o.date)}
+                        </span>
+                      </button>
+                    ))}
+                    <span className="text-xs text-muted">
+                      ou choisis une date ci-dessus.
+                    </span>
+                  </div>
                 ) : null}
               </li>
             );
