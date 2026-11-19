@@ -212,9 +212,12 @@ export function GoalTodoList({
     setLoadingId(todo.id);
     setError(null);
     const supabase = createClient();
+    // Repousser une échéance existante = un report (avancer ou dater une étape non).
+    const isPostponement = !!value && !!todo.due_date && value > todo.due_date;
+    const postponed = (todo.postponed_count ?? 0) + (isPostponement ? 1 : 0);
     const { error: updateError } = await supabase
       .from("goal_todos")
-      .update({ due_date: value || null })
+      .update({ due_date: value || null, postponed_count: postponed })
       .eq("id", todo.id);
     setLoadingId(null);
     if (updateError) {
@@ -222,7 +225,11 @@ export function GoalTodoList({
       return;
     }
     setTodos(
-      todos.map((t) => (t.id === todo.id ? { ...t, due_date: value || null } : t)),
+      todos.map((t) =>
+        t.id === todo.id
+          ? { ...t, due_date: value || null, postponed_count: postponed }
+          : t,
+      ),
     );
     router.refresh();
   }
@@ -345,6 +352,20 @@ export function GoalTodoList({
                           ? formatShortDate(todo.due_date)
                           : `${dueLabel(days!)} · ${formatShortDate(todo.due_date)}`}
                         {isNext && !todo.is_done ? " · prochaine étape" : ""}
+                      </span>
+                    ) : null}
+                    {!todo.is_done && !skipped && todo.postponed_count > 0 ? (
+                      <span
+                        className={`block text-xs ${
+                          todo.postponed_count >= 3
+                            ? "font-medium text-brand-orange-text"
+                            : "text-muted"
+                        }`}
+                      >
+                        Reportée {todo.postponed_count} fois
+                        {todo.postponed_count >= 3
+                          ? " · la faire cette semaine, ou la passer ?"
+                          : ""}
                       </span>
                     ) : null}
                   </span>

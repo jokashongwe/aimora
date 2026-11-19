@@ -69,6 +69,7 @@ export type GoalTodo = {
   is_done: boolean;
   is_skipped: boolean;
   due_date: string | null;
+  postponed_count: number;
   position: number;
   created_at: string;
   updated_at: string;
