@@ -95,6 +95,7 @@ export async function GET(request: Request) {
       .select("title, due_date, goals!inner(status)")
       .eq("user_id", profile.id)
       .eq("is_done", false)
+      .eq("is_skipped", false)
       .eq("goals.status", "active")
       .not("due_date", "is", null)
       .order("due_date", { ascending: true })

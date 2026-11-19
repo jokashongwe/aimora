@@ -16,7 +16,7 @@ export function compareTodos(
 
 /** Prochaine étape à faire : le todo non terminé le plus proche dans le temps. */
 export function nextTodo<T extends GoalTodoSummary>(todos: T[] | null | undefined) {
-  const pending = (todos ?? []).filter((t) => !t.is_done);
+  const pending = (todos ?? []).filter((t) => !t.is_done && !t.is_skipped);
   pending.sort(compareTodos);
   return pending[0] ?? null;
 }

@@ -34,7 +34,7 @@ export default async function GoalsPage({
 
   let query = supabase
     .from("goals")
-    .select("*, categories(*), goal_todos(id, title, is_done, due_date, position)")
+    .select("*, categories(*), goal_todos(id, title, is_done, is_skipped, due_date, position)")
     .eq("user_id", user!.id)
     .order("updated_at", { ascending: false });
 

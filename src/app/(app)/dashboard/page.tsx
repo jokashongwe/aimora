@@ -35,7 +35,7 @@ function epochDay() {
 }
 
 const GOAL_SELECT =
-  "*, categories(*), goal_todos(id, title, is_done, due_date, position)";
+  "*, categories(*), goal_todos(id, title, is_done, is_skipped, due_date, position)";
 
 export default async function DashboardPage() {
   const supabase = await createClient();

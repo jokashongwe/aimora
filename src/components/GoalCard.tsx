@@ -11,7 +11,9 @@ export function GoalCard({
   timeZone?: string;
 }) {
   const todos = goal.goal_todos ?? [];
-  const doneCount = todos.filter((t) => t.is_done).length;
+  const counted = todos.filter((t) => !t.is_skipped);
+  const doneCount = counted.filter((t) => t.is_done).length;
+  const skippedCount = todos.length - counted.length;
   const due = goal.status === "active" ? goalNextDue(goal, timeZone) : null;
 
   return (
@@ -53,7 +55,10 @@ export function GoalCard({
         <div className="flex items-center justify-between text-xs text-muted">
           <span>
             {STATUS_LABELS[goal.status]}
-            {todos.length > 0 ? ` · ${doneCount}/${todos.length} étapes` : ""}
+            {counted.length > 0 ? ` · ${doneCount}/${counted.length} étapes` : ""}
+            {skippedCount > 0
+              ? ` (${skippedCount} passée${skippedCount > 1 ? "s" : ""})`
+              : ""}
           </span>
           <span className="font-semibold text-brand-navy">{goal.progress}%</span>
         </div>

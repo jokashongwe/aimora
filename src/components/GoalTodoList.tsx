@@ -24,10 +24,16 @@ type Props = {
 
 type Repeat = "none" | "weekly" | "monthly";
 
+// Les étapes passées sortent du calcul (numérateur et dénominateur).
+function counted(todos: GoalTodo[]) {
+  return todos.filter((t) => !t.is_skipped);
+}
+
 function percent(todos: GoalTodo[]) {
-  if (todos.length === 0) return 0;
+  const active = counted(todos);
+  if (active.length === 0) return 0;
   return Math.round(
-    (todos.filter((t) => t.is_done).length / todos.length) * 100,
+    (active.filter((t) => t.is_done).length / active.length) * 100,
   );
 }
 
@@ -55,23 +61,26 @@ export function GoalTodoList({
   const [publishOnComplete, setPublishOnComplete] = useState(false);
 
   const sorted = useMemo(() => [...todos].sort(compareTodos), [todos]);
-  const nextId = sorted.find((t) => !t.is_done)?.id;
-  const doneCount = todos.filter((t) => t.is_done).length;
+  const nextId = sorted.find((t) => !t.is_done && !t.is_skipped)?.id;
+  const activeTodos = counted(todos);
+  const doneCount = activeTodos.filter((t) => t.is_done).length;
+  const skippedCount = todos.length - activeTodos.length;
   const progress = percent(todos);
 
   async function afterTodoChange(previousProgress: number, nextTodos: GoalTodo[]) {
     const supabase = createClient();
     const nextProgress = percent(nextTodos);
-    const nextDone = nextTodos.filter((t) => t.is_done).length;
+    const activeNext = counted(nextTodos);
+    const nextDone = activeNext.filter((t) => t.is_done).length;
 
     await supabase.from("goal_checkins").insert({
       goal_id: goalId,
       user_id: userId,
       progress: nextProgress,
       note:
-        nextTodos.length === 0
-          ? "Todos mis à jour"
-          : `${nextDone}/${nextTodos.length} todos terminés`,
+        activeNext.length === 0
+          ? "Étapes mises à jour"
+          : `${nextDone}/${activeNext.length} étapes terminées`,
     });
 
     // On ne publie qu'au moment où l'objectif passe à 100 % (pas à chaque coche).
@@ -150,7 +159,7 @@ export function GoalTodoList({
 
     const { error: updateError } = await supabase
       .from("goal_todos")
-      .update({ is_done: nextDone })
+      .update({ is_done: nextDone, is_skipped: false })
       .eq("id", todo.id);
 
     setLoadingId(null);
@@ -161,7 +170,33 @@ export function GoalTodoList({
 
     const previous = percent(todos);
     const next = todos.map((t) =>
-      t.id === todo.id ? { ...t, is_done: nextDone } : t,
+      t.id === todo.id ? { ...t, is_done: nextDone, is_skipped: false } : t,
+    );
+    setTodos(next);
+    await afterTodoChange(previous, next);
+  }
+
+  // Passer une étape (ex. dîner manqué ce mois-ci) : elle n'est plus comptée
+  // dans la progression. Réversible avec « Rétablir ».
+  async function skipTodo(todo: GoalTodo, skip: boolean) {
+    setLoadingId(todo.id);
+    setError(null);
+    const supabase = createClient();
+
+    const { error: updateError } = await supabase
+      .from("goal_todos")
+      .update({ is_skipped: skip, is_done: false })
+      .eq("id", todo.id);
+
+    setLoadingId(null);
+    if (updateError) {
+      setError(updateError.message);
+      return;
+    }
+
+    const previous = percent(todos);
+    const next = todos.map((t) =>
+      t.id === todo.id ? { ...t, is_skipped: skip, is_done: false } : t,
     );
     setTodos(next);
     await afterTodoChange(previous, next);
@@ -220,7 +255,12 @@ export function GoalTodoList({
           </p>
         </div>
         <span className="shrink-0 text-sm font-semibold text-brand-orange-text">
-          {doneCount}/{todos.length || 0} · {progress}%
+          {doneCount}/{activeTodos.length} · {progress}%
+          {skippedCount > 0 ? (
+            <span className="block text-right text-xs font-normal text-muted">
+              {skippedCount} passée{skippedCount > 1 ? "s" : ""}
+            </span>
+          ) : null}
         </span>
       </div>
 
@@ -233,7 +273,9 @@ export function GoalTodoList({
         <ul className="space-y-2">
           {sorted.map((todo) => {
             const days = todo.due_date ? daysUntil(todo.due_date, timeZone) : null;
-            const overdue = days !== null && days < 0 && !todo.is_done;
+            const skipped = todo.is_skipped;
+            const overdue =
+              days !== null && days < 0 && !todo.is_done && !skipped;
             const isNext = todo.id === nextId;
             return (
               <li
@@ -246,7 +288,7 @@ export function GoalTodoList({
                   <input
                     type="checkbox"
                     checked={todo.is_done}
-                    disabled={!isOwner || loadingId === todo.id}
+                    disabled={!isOwner || skipped || loadingId === todo.id}
                     onChange={() => toggleTodo(todo)}
                     className="h-6 w-6 shrink-0 accent-brand-orange"
                     aria-label={`Marquer « ${todo.title} »`}
@@ -254,14 +296,19 @@ export function GoalTodoList({
                   <span className="min-w-0 flex-1">
                     <span
                       className={`block text-base sm:text-sm ${
-                        todo.is_done
+                        todo.is_done || skipped
                           ? "text-muted line-through"
                           : "font-medium text-brand-navy"
                       }`}
                     >
                       {todo.title}
                     </span>
-                    {todo.due_date ? (
+                    {skipped ? (
+                      <span className="block text-xs italic text-muted">
+                        Passée{todo.due_date ? ` · ${formatShortDate(todo.due_date)}` : ""}
+                      </span>
+                    ) : null}
+                    {todo.due_date && !skipped ? (
                       <span
                         className={`block text-xs ${
                           overdue
@@ -281,6 +328,15 @@ export function GoalTodoList({
                 </label>
                 {isOwner ? (
                   <>
+                    <button
+                      type="button"
+                      className="min-h-11 px-2 text-sm font-medium text-brand-navy underline-offset-2 hover:underline"
+                      disabled={loadingId === todo.id}
+                      onClick={() => skipTodo(todo, !skipped)}
+                      aria-label={`${skipped ? "Rétablir" : "Passer"} l'étape « ${todo.title} »`}
+                    >
+                      {skipped ? "Rétablir" : "Passer"}
+                    </button>
                     <input
                       type="date"
                       value={todo.due_date ?? ""}

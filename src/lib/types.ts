@@ -45,6 +45,7 @@ export type GoalTodoSummary = {
   id: string;
   title: string;
   is_done: boolean;
+  is_skipped: boolean;
   due_date: string | null;
   position: number;
 };
@@ -64,6 +65,7 @@ export type GoalTodo = {
   user_id: string;
   title: string;
   is_done: boolean;
+  is_skipped: boolean;
   due_date: string | null;
   position: number;
   created_at: string;
