@@ -3,17 +3,17 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { configureWebPush, type PushPayload } from "@/lib/push";
 import { daysUntil } from "@/lib/streak";
 import { dueLabel } from "@/lib/todos";
-import { isLocalHourInRange } from "@/lib/timezone";
+import { localNow } from "@/lib/timezone";
 import type { GoalPeriod } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
-// Le cron tourne une fois par jour à 06:00 UTC (plan Hobby). On notifie tous les
-// profils pour qui il est alors le matin (06h-10h locale) : Kinshasa 07h,
-// Paris 07-08h, Nairobi 09h. Avec un cron horaire (plan Pro), réduire cette
-// fenêtre à 1h pour éviter les doublons.
-const REMINDER_WINDOW_START = 6;
-const REMINDER_WINDOW_END = 10;
+// Cette route doit être appelée toutes les heures. Chaque utilisateur reçoit son
+// rappel à l'heure locale qu'il a choisie (profiles.reminder_hour, 7h par défaut).
+// Si une exécution est manquée, on rattrape pendant GRACE_HOURS heures.
+// last_reminder_on garantit un seul rappel par jour et par utilisateur.
+const DEFAULT_REMINDER_HOUR = 7;
+const GRACE_HOURS = 3;
 
 function pickMessage(messages: string[]) {
   if (!messages.length) {
@@ -35,20 +35,27 @@ export async function GET(request: Request) {
 
   const { data: profiles, error: profilesError } = await admin
     .from("profiles")
-    .select("id, timezone, notifications_enabled, display_name")
+    .select("id, timezone, notifications_enabled, display_name, reminder_hour, last_reminder_on")
     .eq("notifications_enabled", true);
 
   if (profilesError) {
     return NextResponse.json({ error: profilesError.message }, { status: 500 });
   }
 
-  const eligible = (profiles ?? []).filter((p) =>
-    isLocalHourInRange(
-      p.timezone || "Africa/Kinshasa",
-      REMINDER_WINDOW_START,
-      REMINDER_WINDOW_END,
-    ),
-  );
+  const eligible = (profiles ?? []).filter((p) => {
+    const { hour, date } = localNow(p.timezone || "Africa/Kinshasa");
+    const target = p.reminder_hour ?? DEFAULT_REMINDER_HOUR;
+    return (
+      hour >= target && hour < target + GRACE_HOURS && p.last_reminder_on !== date
+    );
+  });
+
+  async function markDone(p: { id: string; timezone: string | null }) {
+    await admin
+      .from("profiles")
+      .update({ last_reminder_on: localNow(p.timezone || "Africa/Kinshasa").date })
+      .eq("id", p.id);
+  }
 
   const { data: motivation } = await admin
     .from("motivation_messages")
@@ -74,6 +81,7 @@ export async function GET(request: Request) {
 
     if (!goals?.length) {
       skipped += 1;
+      await markDone(profile);
       continue;
     }
 
@@ -110,7 +118,10 @@ export async function GET(request: Request) {
         : motivation;
 
     const payload: PushPayload = {
-      title: "Aimora — rappel du matin",
+      title:
+        (profile.reminder_hour ?? DEFAULT_REMINDER_HOUR) < 12
+          ? "Aimora — rappel du matin"
+          : "Aimora — ton rappel du jour",
       body,
       url: "/dashboard",
     };
@@ -122,9 +133,11 @@ export async function GET(request: Request) {
 
     if (!subs?.length) {
       skipped += 1;
+      await markDone(profile);
       continue;
     }
 
+    let delivered = 0;
     for (const sub of subs) {
       try {
         await webpush.sendNotification(
@@ -135,6 +148,7 @@ export async function GET(request: Request) {
           JSON.stringify(payload),
         );
         sent += 1;
+        delivered += 1;
       } catch (err) {
         const statusCode =
           err && typeof err === "object" && "statusCode" in err
@@ -148,6 +162,8 @@ export async function GET(request: Request) {
         );
       }
     }
+    // Si rien n'a pu être livré, on retentera à la prochaine exécution (dans la période de rattrapage).
+    if (delivered > 0) await markDone(profile);
   }
 
   return NextResponse.json({

@@ -17,3 +17,24 @@ export function isLocalHourInRange(
     return false;
   }
 }
+
+/** Heure (0-23) et date "AAAA-MM-JJ" locales dans un fuseau donné. */
+export function localNow(timezone: string, now = new Date()) {
+  try {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: timezone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      hourCycle: "h23",
+    }).formatToParts(now);
+    const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+    return {
+      hour: Number(get("hour")),
+      date: `${get("year")}-${get("month")}-${get("day")}`,
+    };
+  } catch {
+    return { hour: now.getUTCHours(), date: now.toISOString().slice(0, 10) };
+  }
+}

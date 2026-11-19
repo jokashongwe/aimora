@@ -9,6 +9,8 @@ export type Profile = {
   avatar_url: string | null;
   timezone: string;
   notifications_enabled: boolean;
+  reminder_hour: number;
+  last_reminder_on: string | null;
   created_at: string;
   updated_at: string;
 };

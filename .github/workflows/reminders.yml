@@ -1,0 +1,28 @@
+# Déclenche les rappels Aimora toutes les heures.
+# (Vercel Hobby n'autorise que des crons quotidiens : on appelle donc la route depuis GitHub.)
+# Chaque utilisateur reçoit son rappel à l'heure locale qu'il a choisie ; la route gère
+# elle-même les doublons et le rattrapage (3 h) si une exécution est retardée.
+name: Rappels Aimora
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  send-reminders:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Appeler la route des rappels
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$APP_URL" ] || [ -z "$CRON_SECRET" ]; then
+            echo "Secrets APP_URL et CRON_SECRET requis (Settings > Secrets and variables > Actions)." >&2
+            exit 1
+          fi
+          curl --fail --silent --show-error --retry 3 --retry-delay 10 \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "${APP_URL%/}/api/cron/morning-reminders"
