@@ -89,7 +89,7 @@ export default async function SharePage() {
                   href={`/goals/${s.goal_id}`}
                   className="card-panel block transition hover:border-brand-orange/40"
                 >
-                  <p className="text-xs text-brand-orange">
+                  <p className="text-xs text-brand-orange-text">
                     De {s.owner?.display_name ?? "Quelqu'un"}
                   </p>
                   <h3 className="mt-1 font-display text-lg font-semibold text-brand-navy">
@@ -123,7 +123,7 @@ export default async function SharePage() {
               <li key={a.id} className="card-panel">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-xs font-medium text-brand-orange">
+                    <p className="text-xs font-medium text-brand-orange-text">
                       {a.profiles?.display_name ?? "Quelqu'un"}
                     </p>
                     <h3 className="font-display text-lg font-semibold text-brand-navy">
@@ -133,7 +133,7 @@ export default async function SharePage() {
                       <p className="mt-1 text-sm text-muted">{a.message}</p>
                     ) : null}
                   </div>
-                  <span className="rounded-full bg-gradient-to-r from-brand-orange to-brand-gold px-2.5 py-1 text-xs font-semibold text-white">
+                  <span className="rounded-full bg-gradient-to-r from-brand-orange to-brand-gold px-2.5 py-1 text-xs font-semibold text-brand-navy">
                     {a.progress}%
                   </span>
                 </div>

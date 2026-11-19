@@ -65,7 +65,7 @@ export default async function GoalDetailPage({ params }: { params: Params }) {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="flex items-center justify-between gap-3">
-        <Link href="/goals" className="text-sm font-medium text-brand-orange">
+        <Link href="/goals" className="text-sm font-medium text-brand-orange-text">
           ← Objectifs
         </Link>
         {isOwner ? (
@@ -77,7 +77,7 @@ export default async function GoalDetailPage({ params }: { params: Params }) {
 
       <div className="card-panel space-y-4">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-brand-orange">
+          <p className="text-xs font-medium uppercase tracking-wide text-brand-orange-text">
             {typed.categories?.name}
           </p>
           <h1 className="mt-1 font-display text-3xl font-semibold text-brand-navy">

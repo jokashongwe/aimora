@@ -62,7 +62,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
       </div>
       <div>
         <label className="label" htmlFor="timezone">
-          Fuseau horaire (rappels matinaux ~07h)
+          Fuseau horaire (rappel chaque matin, vers 7h-9h)
         </label>
         <select
           id="timezone"

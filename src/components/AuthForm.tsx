@@ -123,14 +123,14 @@ export function AuthForm({ mode }: { mode: Mode }) {
         {mode === "login" ? (
           <>
             Pas encore de compte ?{" "}
-            <Link href="/auth/signup" className="font-semibold text-brand-orange">
+            <Link href="/auth/signup" className="font-semibold text-brand-orange-text">
               S&apos;inscrire
             </Link>
           </>
         ) : (
           <>
             Déjà inscrit·e ?{" "}
-            <Link href="/auth/login" className="font-semibold text-brand-orange">
+            <Link href="/auth/login" className="font-semibold text-brand-orange-text">
               Se connecter
             </Link>
           </>

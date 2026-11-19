@@ -7,7 +7,7 @@ export function GoalCard({ goal }: { goal: Goal }) {
     <Link href={`/goals/${goal.id}`} className="card-panel block transition hover:-translate-y-0.5 hover:border-brand-orange/40">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-brand-orange">
+          <p className="text-xs font-medium uppercase tracking-wide text-brand-orange-text">
             {goal.categories?.name ?? "Catégorie"}
           </p>
           <h3 className="mt-1 font-display text-lg font-semibold text-brand-navy">

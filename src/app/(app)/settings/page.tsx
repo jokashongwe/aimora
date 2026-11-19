@@ -1,5 +1,6 @@
 import { NotificationToggle } from "@/components/NotificationToggle";
 import { ProfileForm } from "@/components/ProfileForm";
+import { SignOutButton } from "@/components/SignOutButton";
 import { createClient } from "@/lib/supabase/server";
 import type { Profile } from "@/lib/types";
 
@@ -38,6 +39,13 @@ export default async function SettingsPage() {
           enabled={(profile as Profile | null)?.notifications_enabled ?? false}
           userId={user!.id}
         />
+      </div>
+
+      <div className="card-panel space-y-3">
+        <h2 className="font-display text-lg font-semibold text-brand-navy">
+          Compte
+        </h2>
+        <SignOutButton confirmFirst />
       </div>
     </div>
   );

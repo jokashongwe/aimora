@@ -19,7 +19,7 @@ export default async function NewGoalPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-4">
-      <Link href="/goals" className="text-sm font-medium text-brand-orange">
+      <Link href="/goals" className="text-sm font-medium text-brand-orange-text">
         ← Retour
       </Link>
       <h1 className="font-display text-3xl font-semibold text-brand-navy">

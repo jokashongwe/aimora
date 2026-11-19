@@ -52,7 +52,7 @@ export default async function DashboardPage() {
         </div>
         <div className="card-panel">
           <p className="text-sm text-muted">Progression moyenne</p>
-          <p className="mt-1 font-display text-3xl font-semibold text-brand-orange">
+          <p className="mt-1 font-display text-3xl font-semibold text-brand-orange-text">
             {avgProgress}%
           </p>
         </div>
@@ -60,7 +60,7 @@ export default async function DashboardPage() {
           <p className="text-sm text-muted">Rappels</p>
           <p className="mt-1 text-sm text-brand-navy">
             Active les notifications dans{" "}
-            <Link href="/settings" className="font-semibold text-brand-orange">
+            <Link href="/settings" className="font-semibold text-brand-orange-text">
               Réglages
             </Link>
           </p>

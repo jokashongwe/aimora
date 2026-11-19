@@ -6,6 +6,13 @@ import type { GoalPeriod } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
+// Le cron tourne une fois par jour à 06:00 UTC (plan Hobby). On notifie tous les
+// profils pour qui il est alors le matin (06h-10h locale) : Kinshasa 07h,
+// Paris 07-08h, Nairobi 09h. Avec un cron horaire (plan Pro), réduire cette
+// fenêtre à 1h pour éviter les doublons.
+const REMINDER_WINDOW_START = 6;
+const REMINDER_WINDOW_END = 10;
+
 function pickMessage(messages: string[]) {
   if (!messages.length) {
     return "Bonjour ! Un petit pas vers tes objectifs aujourd'hui.";
@@ -34,7 +41,11 @@ export async function GET(request: Request) {
   }
 
   const eligible = (profiles ?? []).filter((p) =>
-    isLocalHourInRange(p.timezone || "Africa/Kinshasa", 7, 8),
+    isLocalHourInRange(
+      p.timezone || "Africa/Kinshasa",
+      REMINDER_WINDOW_START,
+      REMINDER_WINDOW_END,
+    ),
   );
 
   const { data: motivation } = await admin

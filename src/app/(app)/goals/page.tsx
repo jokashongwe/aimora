@@ -103,7 +103,7 @@ export default async function GoalsPage({
       {list.length === 0 ? (
         <p className="text-sm text-muted">
           Aucun objectif pour ces filtres.{" "}
-          <Link href="/goals/new" className="font-semibold text-brand-orange">
+          <Link href="/goals/new" className="font-semibold text-brand-orange-text">
             Créer un objectif
           </Link>
         </p>

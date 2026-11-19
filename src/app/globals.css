@@ -4,6 +4,7 @@
   --brand-navy: #0b163f;
   --brand-orange: #ff8c00;
   --brand-gold: #ffa500;
+  --brand-orange-text: #a65200; /* orange foncé pour texte (contraste AA >= 5:1) */
   --background: #f7f5f1;
   --foreground: #0b163f;
   --surface: #ffffff;
@@ -16,6 +17,7 @@
   --color-foreground: var(--foreground);
   --color-brand-navy: var(--brand-navy);
   --color-brand-orange: var(--brand-orange);
+  --color-brand-orange-text: var(--brand-orange-text);
   --color-brand-gold: var(--brand-gold);
   --color-surface: var(--surface);
   --color-muted: var(--muted);
@@ -34,15 +36,15 @@ body {
 }
 
 .btn-primary {
-  @apply inline-flex items-center justify-center rounded-xl bg-brand-orange px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange disabled:opacity-60;
+  @apply inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-orange px-5 py-2.5 text-sm font-semibold text-brand-navy transition hover:bg-brand-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange disabled:opacity-60;
 }
 
 .btn-secondary {
-  @apply inline-flex items-center justify-center rounded-xl border border-border bg-surface px-5 py-2.5 text-sm font-semibold text-brand-navy transition hover:border-brand-navy/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-navy;
+  @apply inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-surface px-5 py-2.5 text-sm font-semibold text-brand-navy transition hover:border-brand-navy/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-navy;
 }
 
 .input {
-  @apply w-full rounded-xl border border-border bg-surface px-3.5 py-2.5 text-sm text-brand-navy outline-none transition placeholder:text-muted/70 focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/20;
+  @apply w-full rounded-xl border border-border bg-surface px-3.5 py-2.5 text-base text-brand-navy outline-none transition placeholder:text-muted/70 focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/20;
 }
 
 .label {

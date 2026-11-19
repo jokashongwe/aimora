@@ -158,7 +158,7 @@ export function GoalTodoList({
             automatiquement.
           </p>
         </div>
-        <span className="shrink-0 text-sm font-semibold text-brand-orange">
+        <span className="shrink-0 text-sm font-semibold text-brand-orange-text">
           {doneCount}/{todos.length || 0} · {progress}%
         </span>
       </div>
@@ -172,31 +172,37 @@ export function GoalTodoList({
           {todos.map((todo) => (
             <li
               key={todo.id}
-              className="flex items-center gap-3 rounded-xl border border-border/80 bg-background/60 px-3 py-2.5"
+              className="flex items-center gap-1 rounded-xl border border-border/80 bg-background/60 pl-1 pr-2"
             >
-              <input
-                type="checkbox"
-                checked={todo.is_done}
-                disabled={!isOwner || loadingId === todo.id}
-                onChange={() => toggleTodo(todo)}
-                className="h-4 w-4 accent-brand-orange"
-                aria-label={`Marquer « ${todo.title} »`}
-              />
-              <span
-                className={`flex-1 text-sm ${
-                  todo.is_done
-                    ? "text-muted line-through"
-                    : "font-medium text-brand-navy"
-                }`}
-              >
-                {todo.title}
-              </span>
+              <label className="flex min-h-11 flex-1 cursor-pointer items-center gap-3 px-2">
+                <input
+                  type="checkbox"
+                  checked={todo.is_done}
+                  disabled={!isOwner || loadingId === todo.id}
+                  onChange={() => toggleTodo(todo)}
+                  className="h-6 w-6 shrink-0 accent-brand-orange"
+                  aria-label={`Marquer « ${todo.title} »`}
+                />
+                <span
+                  className={`flex-1 text-base sm:text-sm ${
+                    todo.is_done
+                      ? "text-muted line-through"
+                      : "font-medium text-brand-navy"
+                  }`}
+                >
+                  {todo.title}
+                </span>
+              </label>
               {isOwner ? (
                 <button
                   type="button"
-                  className="text-xs text-muted hover:text-red-600"
+                  className="min-h-11 px-2 text-sm text-muted hover:text-red-600"
                   disabled={loadingId === todo.id}
-                  onClick={() => deleteTodo(todo.id)}
+                  onClick={() => {
+                    if (window.confirm(`Supprimer « ${todo.title} » ?`)) {
+                      deleteTodo(todo.id);
+                    }
+                  }}
                 >
                   Supprimer
                 </button>
