@@ -5,14 +5,17 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { Category, Goal, GoalPeriod, GoalVisibility } from "@/lib/types";
 import { PERIOD_LABELS } from "@/lib/types";
+import { endDateForPeriod } from "@/lib/periods";
 
 type Props = {
   categories: Category[];
   goal?: Goal;
   userId: string;
+  /** Date du jour (fuseau de l'utilisateur) : sert à suggérer la date de fin à la création. */
+  today?: string;
 };
 
-export function GoalForm({ categories, goal, userId }: Props) {
+export function GoalForm({ categories, goal, userId, today }: Props) {
   const router = useRouter();
   const [title, setTitle] = useState(goal?.title ?? "");
   const [description, setDescription] = useState(goal?.description ?? "");
@@ -23,7 +26,18 @@ export function GoalForm({ categories, goal, userId }: Props) {
   const [visibility, setVisibility] = useState<GoalVisibility>(
     goal?.visibility ?? "private",
   );
-  const [endDate, setEndDate] = useState(goal?.end_date ?? "");
+  // À la création, la date de fin est suggérée d'après la période, tant que
+  // l'utilisateur ne l'a pas modifiée lui-même.
+  const suggest = !goal && !!today;
+  const [endDate, setEndDate] = useState(
+    goal?.end_date ?? (suggest ? endDateForPeriod(today!, "weekly") : ""),
+  );
+  const [endTouched, setEndTouched] = useState(false);
+
+  function changePeriod(next: GoalPeriod) {
+    setPeriod(next);
+    if (suggest && !endTouched) setEndDate(endDateForPeriod(today!, next));
+  }
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -42,6 +56,8 @@ export function GoalForm({ categories, goal, userId }: Props) {
       end_date: endDate || null,
       user_id: userId,
     };
+    // Aligne la date de début sur le jour de l'utilisateur (et non sur UTC).
+    const insertPayload = today ? { ...payload, start_date: today } : payload;
 
     try {
       if (goal) {
@@ -54,7 +70,7 @@ export function GoalForm({ categories, goal, userId }: Props) {
       } else {
         const { data, error: insertError } = await supabase
           .from("goals")
-          .insert(payload)
+          .insert(insertPayload)
           .select("id")
           .single();
         if (insertError) throw insertError;
@@ -125,7 +141,7 @@ export function GoalForm({ categories, goal, userId }: Props) {
             id="period"
             className="input"
             value={period}
-            onChange={(e) => setPeriod(e.target.value as GoalPeriod)}
+            onChange={(e) => changePeriod(e.target.value as GoalPeriod)}
           >
             {(Object.keys(PERIOD_LABELS) as GoalPeriod[]).map((key) => (
               <option key={key} value={key}>
@@ -161,8 +177,17 @@ export function GoalForm({ categories, goal, userId }: Props) {
             type="date"
             className="input"
             value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
+            min={today}
+            onChange={(e) => {
+              setEndTouched(true);
+              setEndDate(e.target.value);
+            }}
           />
+          {suggest ? (
+            <p className="mt-1 text-xs text-muted">
+              Proposée selon la période choisie. Modifie-la si besoin.
+            </p>
+          ) : null}
         </div>
       </div>
 
