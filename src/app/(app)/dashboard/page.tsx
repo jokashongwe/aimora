@@ -2,7 +2,8 @@ import Link from "next/link";
 import { GoalCard } from "@/components/GoalCard";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { createClient } from "@/lib/supabase/server";
-import { computeStreak, daysUntil } from "@/lib/streak";
+import { computeStreak } from "@/lib/streak";
+import { dueLabel, formatShortDate, goalNextDue } from "@/lib/todos";
 import { PERIOD_LABELS, type Goal, type GoalPeriod } from "@/lib/types";
 
 export const metadata = { title: "Accueil" };
@@ -33,12 +34,8 @@ function epochDay() {
   return Math.floor(Date.now() / 86_400_000);
 }
 
-function dueLabel(days: number) {
-  if (days < 0) return `En retard de ${-days} j`;
-  if (days === 0) return "Aujourd'hui";
-  if (days === 1) return "Demain";
-  return `Dans ${days} jours`;
-}
+const GOAL_SELECT =
+  "*, categories(*), goal_todos(id, title, is_done, due_date, position)";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -62,13 +59,13 @@ export default async function DashboardPage() {
       .maybeSingle(),
     supabase
       .from("goals")
-      .select("*, categories(*)")
+      .select(GOAL_SELECT)
       .eq("user_id", user!.id)
       .eq("status", "active")
       .order("updated_at", { ascending: false }),
     supabase
       .from("goals")
-      .select("*, categories(*)")
+      .select(GOAL_SELECT)
       .eq("user_id", user!.id)
       .eq("status", "completed")
       .order("updated_at", { ascending: false })
@@ -107,11 +104,14 @@ export default async function DashboardPage() {
   const dayNumber = epochDay();
   const quote = quotes.length ? quotes[dayNumber % quotes.length] : null;
 
+  // Une ligne par objectif : son prochain todo (sinon la date de fin).
   const upcoming = list
-    .filter((g) => g.end_date)
-    .map((g) => ({ goal: g, days: daysUntil(g.end_date!, tz) }))
-    .sort((a, b) => a.days - b.days)
-    .slice(0, 3);
+    .map((goal) => ({ goal, due: goalNextDue(goal, tz) }))
+    .filter(
+      (x): x is { goal: Goal; due: NonNullable<typeof x.due> } => x.due !== null,
+    )
+    .sort((a, b) => a.due.days - b.due.days)
+    .slice(0, 5);
 
   return (
     <div className="space-y-8">
@@ -201,21 +201,37 @@ export default async function DashboardPage() {
             Prochaines échéances
           </h2>
           <ul className="space-y-2">
-            {upcoming.map(({ goal, days }) => (
+            {upcoming.map(({ goal, due }) => (
               <li key={goal.id}>
                 <Link
                   href={`/goals/${goal.id}`}
                   className="card-panel flex min-h-11 items-center justify-between gap-3 !py-3"
                 >
-                  <span className="font-medium text-brand-navy">
-                    {goal.title}
+                  <span className="min-w-0">
+                    <span className="block truncate font-medium text-brand-navy">
+                      {due.label}
+                    </span>
+                    {due.fromTodo ? (
+                      <span className="block truncate text-xs text-muted">
+                        {goal.title}
+                      </span>
+                    ) : (
+                      <span className="block text-xs text-muted">
+                        Date de fin de l&apos;objectif
+                      </span>
+                    )}
                   </span>
-                  <span
-                    className={`shrink-0 text-sm font-semibold ${
-                      days < 0 ? "text-red-700" : "text-brand-orange-text"
-                    }`}
-                  >
-                    {dueLabel(days)}
+                  <span className="shrink-0 text-right">
+                    <span
+                      className={`block text-sm font-semibold ${
+                        due.days < 0 ? "text-red-700" : "text-brand-orange-text"
+                      }`}
+                    >
+                      {dueLabel(due.days)}
+                    </span>
+                    <span className="block text-xs text-muted">
+                      {formatShortDate(due.date)}
+                    </span>
                   </span>
                 </Link>
               </li>
@@ -245,7 +261,7 @@ export default async function DashboardPage() {
                 ) : (
                   <div className="grid gap-4 sm:grid-cols-2">
                     {items.map((goal) => (
-                      <GoalCard key={goal.id} goal={goal} />
+                      <GoalCard key={goal.id} goal={goal} timeZone={tz} />
                     ))}
                   </div>
                 )}
@@ -261,7 +277,7 @@ export default async function DashboardPage() {
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">
             {done.map((goal) => (
-              <GoalCard key={goal.id} goal={goal} />
+              <GoalCard key={goal.id} goal={goal} timeZone={tz} />
             ))}
           </div>
         </section>

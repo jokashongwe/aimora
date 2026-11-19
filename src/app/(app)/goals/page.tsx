@@ -25,9 +25,16 @@ export default async function GoalsPage({
     .or(`is_system.eq.true,user_id.eq.${user!.id}`)
     .order("name");
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("timezone")
+    .eq("id", user!.id)
+    .maybeSingle();
+  const tz = profile?.timezone || "Africa/Kinshasa";
+
   let query = supabase
     .from("goals")
-    .select("*, categories(*)")
+    .select("*, categories(*), goal_todos(id, title, is_done, due_date, position)")
     .eq("user_id", user!.id)
     .order("updated_at", { ascending: false });
 
@@ -110,7 +117,7 @@ export default async function GoalsPage({
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
           {list.map((goal) => (
-            <GoalCard key={goal.id} goal={goal} />
+            <GoalCard key={goal.id} goal={goal} timeZone={tz} />
           ))}
         </div>
       )}

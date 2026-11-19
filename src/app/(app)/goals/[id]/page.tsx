@@ -59,6 +59,13 @@ export default async function GoalDetailPage({ params }: { params: Params }) {
       .limit(10),
   ]);
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("timezone")
+    .eq("id", user!.id)
+    .maybeSingle();
+  const tz = profile?.timezone || "Africa/Kinshasa";
+
   const todoList = (todos ?? []) as GoalTodo[];
   const hasTodos = todoList.length > 0;
 
@@ -98,7 +105,7 @@ export default async function GoalDetailPage({ params }: { params: Params }) {
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-muted">
-              Progression{hasTodos ? " (via todos)" : ""}
+              Progression{hasTodos ? " (via les étapes)" : ""}
             </span>
             <span className="font-semibold">{typed.progress}%</span>
           </div>
@@ -107,6 +114,7 @@ export default async function GoalDetailPage({ params }: { params: Params }) {
       </div>
 
       <GoalTodoList
+        timeZone={tz}
         goalId={typed.id}
         userId={user!.id}
         goalTitle={typed.title}
@@ -136,7 +144,7 @@ export default async function GoalDetailPage({ params }: { params: Params }) {
                     {c.progress}%
                   </span>
                   <span className="text-xs text-muted">
-                    {new Date(c.created_at).toLocaleString("fr-FR")}
+                    {new Date(c.created_at).toLocaleString("fr-FR", { timeZone: tz })}
                   </span>
                 </div>
                 {c.note ? <p className="mt-1 text-muted">{c.note}</p> : null}

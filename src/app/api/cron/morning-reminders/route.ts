@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { configureWebPush, type PushPayload } from "@/lib/push";
+import { daysUntil } from "@/lib/streak";
+import { dueLabel } from "@/lib/todos";
 import { isLocalHourInRange } from "@/lib/timezone";
 import type { GoalPeriod } from "@/lib/types";
 
@@ -81,10 +83,30 @@ export async function GET(request: Request) {
     else if (periods.has("monthly")) periodKey = "monthly";
     else if (periods.has("weekly")) periodKey = "weekly";
 
-    const body = pickMessage([
+    const motivation = pickMessage([
       ...(byPeriod[periodKey] ?? []),
       ...(byPeriod.morning ?? []),
     ]);
+
+    // Prochaine étape à faire (en retard ou dans les 7 jours) : on la met en avant.
+    const profileTz = profile.timezone || "Africa/Kinshasa";
+    const { data: nextTodos } = await admin
+      .from("goal_todos")
+      .select("title, due_date, goals!inner(status)")
+      .eq("user_id", profile.id)
+      .eq("is_done", false)
+      .eq("goals.status", "active")
+      .not("due_date", "is", null)
+      .order("due_date", { ascending: true })
+      .limit(1);
+    const nextTodo = nextTodos?.[0];
+    const nextDays = nextTodo
+      ? daysUntil(nextTodo.due_date as string, profileTz)
+      : null;
+    const body =
+      nextTodo && nextDays !== null && nextDays <= 7
+        ? `${dueLabel(nextDays)} : ${nextTodo.title}. ${motivation}`
+        : motivation;
 
     const payload: PushPayload = {
       title: "Aimora — rappel du matin",

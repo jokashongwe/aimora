@@ -38,6 +38,15 @@ export type Goal = {
   created_at: string;
   updated_at: string;
   categories?: Category | null;
+  goal_todos?: GoalTodoSummary[] | null;
+};
+
+export type GoalTodoSummary = {
+  id: string;
+  title: string;
+  is_done: boolean;
+  due_date: string | null;
+  position: number;
 };
 
 export type GoalCheckin = {
@@ -55,6 +64,7 @@ export type GoalTodo = {
   user_id: string;
   title: string;
   is_done: boolean;
+  due_date: string | null;
   position: number;
   created_at: string;
   updated_at: string;
