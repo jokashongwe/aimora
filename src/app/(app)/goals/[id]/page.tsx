@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { CheckinForm } from "@/components/CheckinForm";
 import { GoalTodoList } from "@/components/GoalTodoList";
 import { ProgressBar } from "@/components/ProgressBar";
+import { groupCheckinsByDay } from "@/lib/checkins";
 import { createClient } from "@/lib/supabase/server";
 import {
   PERIOD_LABELS,
@@ -56,7 +57,7 @@ export default async function GoalDetailPage({ params }: { params: Params }) {
       .select("*")
       .eq("goal_id", id)
       .order("created_at", { ascending: false })
-      .limit(10),
+      .limit(300),
   ]);
 
   const { data: profile } = await supabase
@@ -68,6 +69,7 @@ export default async function GoalDetailPage({ params }: { params: Params }) {
 
   const todoList = (todos ?? []) as GoalTodo[];
   const hasTodos = todoList.length > 0;
+  const history = groupCheckinsByDay((checkins ?? []) as GoalCheckin[], tz).slice(0, 14);
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -135,19 +137,41 @@ export default async function GoalDetailPage({ params }: { params: Params }) {
         <h2 className="font-display text-lg font-semibold text-brand-navy">
           Historique
         </h2>
-        {(checkins as GoalCheckin[] | null)?.length ? (
+        {history.length ? (
           <ul className="space-y-2">
-            {(checkins as GoalCheckin[]).map((c) => (
-              <li key={c.id} className="card-panel !p-3 text-sm">
-                <div className="flex justify-between gap-2">
-                  <span className="font-medium text-brand-navy">
-                    {c.progress}%
+            {history.map((d) => (
+              <li key={d.day} className="card-panel !p-3 text-sm">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-medium capitalize text-brand-navy">
+                    {d.label}
                   </span>
-                  <span className="text-xs text-muted">
-                    {new Date(c.created_at).toLocaleString("fr-FR", { timeZone: tz })}
+                  <span className="flex items-center gap-2">
+                    {d.delta !== null && d.delta !== 0 ? (
+                      <span
+                        className={`text-xs font-semibold ${
+                          d.delta > 0 ? "text-emerald-700" : "text-red-700"
+                        }`}
+                      >
+                        {d.delta > 0 ? "+" : ""}
+                        {d.delta} pts
+                      </span>
+                    ) : null}
+                    <span className="font-semibold text-brand-navy">
+                      {d.progress}%
+                    </span>
                   </span>
                 </div>
-                {c.note ? <p className="mt-1 text-muted">{c.note}</p> : null}
+                {d.updates > 0 ? (
+                  <p className="mt-1 text-xs text-muted">
+                    {d.updates} mise{d.updates > 1 ? "s" : ""} à jour des étapes
+                  </p>
+                ) : null}
+                {d.notes.map((n) => (
+                  <p key={n.id} className="mt-1 text-muted">
+                    <span className="text-xs">{n.time} · </span>
+                    {n.text}
+                  </p>
+                ))}
               </li>
             ))}
           </ul>
