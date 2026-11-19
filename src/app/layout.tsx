@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     title: "Airoma",
   },
   icons: {
-    icon: "/icons/icon-192.png",
+    icon: "/aimora.svg",
     apple: "/apple-touch-icon.png",
   },
 };
