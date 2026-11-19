@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ShareForm } from "@/components/ShareForm";
 import { ProgressBar } from "@/components/ProgressBar";
 import { createClient } from "@/lib/supabase/server";
@@ -84,7 +85,7 @@ export default async function SharePage() {
           <div className="grid gap-4 sm:grid-cols-2">
             {(incoming as Array<GoalShare & { owner?: { display_name: string }; goals?: Goal }>).map(
               (s) => (
-                <a
+                <Link
                   key={s.id}
                   href={`/goals/${s.goal_id}`}
                   className="card-panel block transition hover:border-brand-orange/40"
@@ -104,7 +105,7 @@ export default async function SharePage() {
                       <ProgressBar value={s.goals.progress} />
                     </div>
                   ) : null}
-                </a>
+                </Link>
               ),
             )}
           </div>
