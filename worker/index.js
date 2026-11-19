@@ -1,7 +1,7 @@
-/* Custom service worker additions for Airoma Web Push */
+/* Custom service worker additions for Aimora Web Push */
 self.addEventListener("push", (event) => {
   let payload = {
-    title: "Airoma",
+    title: "Aimora",
     body: "Un petit rappel pour tes objectifs.",
     url: "/dashboard",
   };

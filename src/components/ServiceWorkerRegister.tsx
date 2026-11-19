@@ -10,7 +10,7 @@ export function ServiceWorkerRegister() {
     // En dev le PWA est désactivé : on enregistre le SW push dédié.
     if (process.env.NODE_ENV === "development") {
       navigator.serviceWorker
-        .register("/airoma-sw.js")
+        .register("/aimora-sw.js")
         .catch((err) => console.warn("SW registration failed", err));
     }
   }, []);

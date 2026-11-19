@@ -15,16 +15,16 @@ const fraunces = Fraunces({
 
 export const metadata: Metadata = {
   title: {
-    default: "Airoma",
-    template: "%s · Airoma",
+    default: "Aimora",
+    template: "%s · Aimora",
   },
   description:
-    "Airoma t'aide à suivre tes objectifs, recevoir des rappels motivationnels et partager tes réussites.",
-  applicationName: "Airoma",
+    "Aimora t'aide à suivre tes objectifs, recevoir des rappels motivationnels et partager tes réussites.",
+  applicationName: "Aimora",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Airoma",
+    title: "Aimora",
   },
   icons: {
     icon: "/aimora.svg",

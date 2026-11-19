@@ -9,7 +9,7 @@ export default function OfflinePage() {
         Tu es hors ligne
       </h1>
       <p className="mt-2 text-muted">
-        Airoma se reconnectera dès que le réseau sera disponible.
+        Aimora se reconnectera dès que le réseau sera disponible.
       </p>
       <Link href="/dashboard" className="btn-primary mt-6">
         Réessayer

@@ -87,7 +87,7 @@ export async function GET(request: Request) {
     ]);
 
     const payload: PushPayload = {
-      title: "Airoma — rappel du matin",
+      title: "Aimora — rappel du matin",
       body,
       url: "/dashboard",
     };

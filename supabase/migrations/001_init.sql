@@ -1,4 +1,4 @@
--- Airoma initial schema
+-- Aimora initial schema
 create extension if not exists "pgcrypto";
 
 -- Profiles

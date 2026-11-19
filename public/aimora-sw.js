@@ -1,5 +1,5 @@
-/* Airoma push + offline fallback service worker */
-const CACHE = "airoma-v1";
+/* Aimora push + offline fallback service worker */
+const CACHE = "aimora-v1";
 const OFFLINE_URL = "/offline";
 
 self.addEventListener("install", (event) => {
@@ -23,7 +23,7 @@ self.addEventListener("fetch", (event) => {
 
 self.addEventListener("push", (event) => {
   let payload = {
-    title: "Airoma",
+    title: "Aimora",
     body: "Un petit rappel pour tes objectifs.",
     url: "/dashboard",
   };

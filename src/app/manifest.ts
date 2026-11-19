@@ -3,8 +3,8 @@ import type { MetadataRoute } from "next";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: "/dashboard",
-    name: "Airoma",
-    short_name: "Airoma",
+    name: "Aimora",
+    short_name: "Aimora",
     description:
       "Suivez vos objectifs, recevez des rappels motivationnels et partagez vos réussites.",
     start_url: "/dashboard",

@@ -9,7 +9,7 @@ export default function HomePage() {
       <header className="relative z-10 mx-auto flex w-full max-w-5xl items-center justify-between px-4 py-5">
         <Image
           src="/logo.png"
-          alt="Airoma"
+          alt="Aimora"
           width={140}
           height={42}
           className="h-9 w-auto"
@@ -27,7 +27,7 @@ export default function HomePage() {
 
       <main className="relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center px-4 pb-16 pt-8">
         <p className="mb-4 max-w-xl font-display text-5xl font-semibold leading-tight tracking-tight text-brand-navy sm:text-6xl">
-          Airoma
+          Aimora
         </p>
         <h1 className="max-w-2xl text-xl font-medium text-brand-navy/90 sm:text-2xl">
           Suis tes objectifs. Reste motivé·e chaque matin. Partage tes réussites.

@@ -13,7 +13,7 @@ export function SignOutButton({
   const router = useRouter();
 
   async function signOut() {
-    if (confirmFirst && !window.confirm("Te déconnecter d'Airoma ?")) return;
+    if (confirmFirst && !window.confirm("Te déconnecter d'Aimora ?")) return;
     const supabase = createClient();
     await supabase.auth.signOut();
     router.push("/");

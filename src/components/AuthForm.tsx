@@ -57,7 +57,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
         <p className="mt-1 text-sm text-muted">
           {mode === "login"
             ? "Retrouve tes objectifs et ta progression."
-            : "Rejoins Airoma et commence à suivre tes objectifs."}
+            : "Rejoins Aimora et commence à suivre tes objectifs."}
         </p>
       </div>
 

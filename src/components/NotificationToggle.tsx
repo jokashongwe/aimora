@@ -39,7 +39,7 @@ export function NotificationToggle({
 
       let registration = await navigator.serviceWorker.getRegistration();
       if (!registration) {
-        registration = await navigator.serviceWorker.register("/airoma-sw.js");
+        registration = await navigator.serviceWorker.register("/aimora-sw.js");
       }
       registration = await navigator.serviceWorker.ready;
       const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
@@ -111,7 +111,7 @@ export function NotificationToggle({
     return (
       <p className="text-sm text-muted">
         {ios
-          ? "Sur iPhone, installe d'abord Airoma : touche Partager dans Safari, puis « Sur l'écran d'accueil ». Ouvre ensuite l'app depuis l'icône et reviens ici pour activer les rappels."
+          ? "Sur iPhone, installe d'abord Aimora : touche Partager dans Safari, puis « Sur l'écran d'accueil ». Ouvre ensuite l'app depuis l'icône et reviens ici pour activer les rappels."
           : "Les notifications push ne sont pas supportées sur cet appareil / navigateur."}
       </p>
     );

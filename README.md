@@ -1,4 +1,4 @@
-# Airoma
+# Aimora
 
 PWA de suivi d’objectifs (Next.js + Tailwind + Supabase).
 

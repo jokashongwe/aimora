@@ -7,7 +7,7 @@ type BeforeInstallPromptEvent = Event & {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
 
-const DISMISS_KEY = "airoma-install-dismissed";
+const DISMISS_KEY = "aimora-install-dismissed";
 const DISMISS_DAYS = 14;
 
 function readEnv(): string {
@@ -80,7 +80,7 @@ export function InstallPrompt() {
     >
       <div>
         <p className="font-display text-lg font-semibold text-brand-navy">
-          Installe Airoma sur ton téléphone
+          Installe Aimora sur ton téléphone
         </p>
         <p className="mt-1 text-sm text-muted">
           {mode === "ios"

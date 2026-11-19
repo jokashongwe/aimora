@@ -74,7 +74,7 @@ export function AppNav({ displayName }: { displayName?: string }) {
           <Link href="/dashboard" className="flex items-center gap-2">
             <Image
               src="/logo.png"
-              alt="Airoma"
+              alt="Aimora"
               width={120}
               height={36}
               className="h-8 w-auto"
