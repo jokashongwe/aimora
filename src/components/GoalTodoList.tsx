@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { daysUntil } from "@/lib/streak";
@@ -48,9 +48,13 @@ export function GoalTodoList({
   const router = useRouter();
   const [todos, setTodos] = useState(initialTodos);
 
-  useEffect(() => {
+  // Resynchronise avec les données du serveur après un router.refresh()
+  // (ajustement d'état pendant le rendu, recommandé par React à la place d'un effet).
+  const [serverTodos, setServerTodos] = useState(initialTodos);
+  if (initialTodos !== serverTodos) {
+    setServerTodos(initialTodos);
     setTodos(initialTodos);
-  }, [initialTodos]);
+  }
   const [title, setTitle] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [repeat, setRepeat] = useState<Repeat>("none");

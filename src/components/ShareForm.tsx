@@ -27,7 +27,7 @@ export function ShareForm({
     const supabase = createClient();
 
     try {
-      const { data: profile, error: profileError } = await supabase
+      const { data: profile } = await supabase
         .from("profiles")
         .select("id, display_name")
         .ilike("display_name", email.trim())

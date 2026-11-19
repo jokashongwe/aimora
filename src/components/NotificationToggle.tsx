@@ -1,8 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { urlBase64ToUint8Array } from "@/lib/push-client";
+
+const subscribeNoop = () => () => {};
+
+function readEnv() {
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const supported =
+    "serviceWorker" in navigator &&
+    "PushManager" in window &&
+    "Notification" in window;
+  return `${ios ? "ios-" : ""}${supported ? "supported" : "unsupported"}`;
+}
 
 export function NotificationToggle({
   enabled,
@@ -11,22 +22,14 @@ export function NotificationToggle({
   enabled: boolean;
   userId: string;
 }) {
-  const [supported, setSupported] = useState(false);
   const [active, setActive] = useState(enabled);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  const [ios, setIos] = useState(false);
-
-  useEffect(() => {
-    setIos(/iphone|ipad|ipod/i.test(navigator.userAgent));
-    setSupported(
-      typeof window !== "undefined" &&
-        "serviceWorker" in navigator &&
-        "PushManager" in window &&
-        "Notification" in window,
-    );
-  }, []);
+  // Capacités du navigateur : lues côté client uniquement, sans décalage d'hydratation.
+  const env = useSyncExternalStore(subscribeNoop, readEnv, () => "server");
+  const supported = env === "supported" || env === "ios-supported";
+  const ios = env.startsWith("ios");
 
   async function enableNotifications() {
     setLoading(true);
