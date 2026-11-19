@@ -17,7 +17,7 @@ export function GoalCard({
   const due = goal.status === "active" ? goalNextDue(goal, timeZone) : null;
 
   return (
-    <Link href={`/goals/${goal.id}`} className="card-panel block transition hover:-translate-y-0.5 hover:border-brand-orange/40">
+    <Link href={`/goals/${goal.id}`} className="card-panel block min-w-0 transition hover:-translate-y-0.5 hover:border-brand-orange/40">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
           <p className="text-xs font-medium uppercase tracking-wide text-brand-orange-text">

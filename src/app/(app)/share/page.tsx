@@ -82,7 +82,7 @@ export default async function SharePage() {
           Objectifs partagés avec moi
         </h2>
         {(incoming as GoalShare[] | null)?.length ? (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {(incoming as Array<GoalShare & { owner?: { display_name: string }; goals?: Goal }>).map(
               (s) => (
                 <Link

@@ -259,7 +259,7 @@ export default async function DashboardPage() {
                     </Link>
                   </p>
                 ) : (
-                  <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     {items.map((goal) => (
                       <GoalCard key={goal.id} goal={goal} timeZone={tz} />
                     ))}
@@ -275,7 +275,7 @@ export default async function DashboardPage() {
           <h2 className="font-display text-xl font-semibold text-brand-navy">
             Réussites récentes
           </h2>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {done.map((goal) => (
               <GoalCard key={goal.id} goal={goal} timeZone={tz} />
             ))}

@@ -115,7 +115,7 @@ export default async function GoalsPage({
           </Link>
         </p>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {list.map((goal) => (
             <GoalCard key={goal.id} goal={goal} timeZone={tz} />
           ))}
