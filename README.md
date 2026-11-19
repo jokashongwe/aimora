@@ -1,36 +1,86 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Airoma
 
-## Getting Started
+PWA de suivi d’objectifs (Next.js + Tailwind + Supabase).
 
-First, run the development server:
+## Fonctionnalités
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Objectifs par catégorie (Famille, Travail, Étude, Santé, Finances, Personnel)
+- Périodes : hebdomadaire, mensuelle, semestrielle
+- Todos par objectif (cocher = progression auto jusqu’à validation)
+- Check-ins de progression + publication des réussites
+- Partage d’objectifs entre utilisateurs
+- Rappels matinaux Web Push (messages motivationnels ~07h selon le fuseau du profil)
+
+## Prérequis
+
+1. Un projet Supabase existant
+2. Node.js 20+
+
+## Setup
+
+### 1. Variables d’environnement
+
+Copie `.env.example` vers `.env.local` (déjà prérempli pour les clés VAPID) et renseigne :
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=...
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Les clés VAPID et `CRON_SECRET` sont déjà générées dans `.env.local`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 2. Schéma SQL
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Dans le SQL Editor Supabase, exécute dans l’ordre :
 
-## Learn More
+1. [`supabase/migrations/001_init.sql`](supabase/migrations/001_init.sql)
+2. [`supabase/migrations/002_goal_todos.sql`](supabase/migrations/002_goal_todos.sql) (todos + sync progression)
 
-To learn more about Next.js, take a look at the following resources:
+Cela crée les tables, RLS, trigger profil, catégories système et messages motivationnels.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 3. Auth Supabase
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Dans Authentication → Providers, active **Email**.  
+(Optionnel) désactive la confirmation email en local pour tester plus vite.
 
-## Deploy on Vercel
+### 4. Lancer l’app
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm install
+npm run dev
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Ouvre [http://localhost:3000](http://localhost:3000).
+
+### 5. PWA & notifications
+
+- En production (`npm run build && npm start`), le service worker est actif.
+- En développement, le SW PWA est désactivé ; les push peuvent nécessiter un build.
+- Active les notifications dans **Réglages** (HTTPS ou localhost requis).
+
+### 6. Cron matinal
+
+`vercel.json` appelle chaque heure `/api/cron/morning-reminders`.  
+L’API n’envoie que si l’heure locale du profil est entre 07:00 et 08:00.
+
+Header requis :
+
+```http
+Authorization: Bearer <CRON_SECRET>
+```
+
+## Scripts
+
+| Commande        | Description        |
+|-----------------|--------------------|
+| `npm run dev`   | Dev server         |
+| `npm run build` | Build production   |
+| `npm start`     | Serveur production |
+| `npm run lint`  | ESLint             |
+
+## Stack
+
+- Next.js (App Router) + TypeScript + Tailwind CSS v4
+- Supabase Auth / Postgres / RLS
+- `@ducanh2912/next-pwa` + Web Push (`web-push`)
